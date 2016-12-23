@@ -1,0 +1,2 @@
+create database webserver;
+update user_role set role='sup_admin' where user_id = 1;

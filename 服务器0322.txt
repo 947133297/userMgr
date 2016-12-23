@@ -1,0 +1,176 @@
+	
+	服务器分三个层
+		0.路由与连接：接收连接，解析json生成一个map，根据里面的权限把数据路由到对应的业务逻辑,如调用逻辑层里的AddUSer，然后把AddUSer返回的map[string]string封装成json，写入到conn
+			后期如果要增加网页部分，也直接调用业务逻辑层就可以了
+			
+		1.业务逻辑：一个权限代表一个业务逻辑，一个函数，如Add_User    要求函数格式：单词(首字母大写)_单词（首字母大写）
+			a.先对数据进行校验（如空数据，非法字符）
+			b.重点：查询这个用户有没有这个操作的权限  //也还是调用数据访问层里的函数
+			c.校验token
+			d.如果以上都通过,调用数据访问层里的函数，返回一个map[string]string 给上一层
+			
+			这个层定义的所有函数都有同意的规格返回值和参数都是map[string]string，意图是用来路由的时候比较方便
+				如： 定义一个 map[string]func(map[string]string)map[string]string   //直接根据一个权限常量就可以找到对应业务逻辑函数
+			
+		2.数据访问：要求函数格式：单词(首字母大写)_单词（首字母小写）
+		
+			主要从数据库中把要用的数据查询出来返回给  业务逻辑 层	，如Add_user被Add_User调用；后期如果要改成redis，只需要改这一个层就可以了
+
+			
+			
+			
+			
+							 权限常量				业务逻辑										数据访问			
+		
+超级管理员	
+	为用户分配角色				0			map DispatchAuth(map[string]string)				bool Dispatch_auth(user_id,role ,token string)  //bool 表示是否操作成功
+											返回的map要求有：
+												tag ：数据标志
+											传递进去的map要求:
+												user_id/
+												,token
+												role ：新角色（要覆盖这个用户原来的角色）
+											
+	增加用户					1			map AddUser(map[string]string)						string Add_user(name,pwd ,sex age ,token string) 
+											返回的map要求有：									//返回新建用户的user_id（空字符串代表新建失败）
+												user_id ：代表新建用户的user_id
+												tag：
+											传递进去的map要求:
+												name ：用户名
+												pwd  : 密码 
+												sex	 ： 性别
+												age  ： 年龄
+												,token
+	
+	删除用户					2			map DelUser(map[string]string)						bool Del_user(user_id ,token string) 
+											返回的map要求有：
+												tag ：数据标志
+											传递进去的map要求:
+												user_id ,token：
+
+												
+												
+	增加公告					3			map AddBillboard(map[string]string)					string Add_billboard(last_time,user_id,content ,name ,token string) //默认‘角色’为user
+											返回的map要求有：										//返回值：新添加的公告的公告号:billboard_id(返回空串代表添加失败)
+												tag ：数据标志
+												billboard_id:公告号（公告的唯一标识，方便对公告操作）
+											传递进去的map要求:
+												last_time(当前时间)	user_id	name,content ,token
+											
+	查看公告					4			map ViewBillboard(map[string]string)					map View_billboard(int count,token string) //把最新的前count条公告查出来，传-1代表把全部查询出来（方便管理员查看全部）
+											返回的map要求有：										返回一个map：
+												tag ：数据标志												要求有：contents,last_times,names,billboard_ids,user_ids //特殊字符串分隔，一一对应
+												其余内容和View_billboard返回的一致												这里的特殊字符串自己定，如%7#17%%
+																																														
+											传递进去的map要求:
+												,token												
+												
+	修改公告					5			map ModifyBillboard(map[string]string)				bool Modify_billboard(billboard_id,content ,token string)  //要更新时间
+											返回的map要求有：
+											
+												tag ：数据标志
+											传递进去的map要求:
+												content ,token, billboard_id// 主要是根据公告id来修改公告
+												
+												
+	删除公告					6			map DelBillboard(map[string]string)						bool Del_billboard(billboard_id ,token string) 
+											返回的map要求有：
+												tag ：数据标志
+												
+											传递进去的map要求:
+												billboard_id,token
+												
+	查看指定用户所有信息		7			map View_Msg(map[string]string)						map View_msg(user_id ,token string) 
+											返回的map要求有：										返回的map要求
+												tag ：数据标志											name sex	pwd  age  intro(用户简介,存放用户特有信息)
+												其余内容和View_msg()返回的map内容一致	
+											传递进去的map要求:
+												user_id,token
+												
+	修改指定用户所有信息		8			map Modify_Msg(map[string]string)						bool Modify_msg(user_id，name sex，pwd，age，intro ,token string) 
+											返回的map要求有：											根据user_id来修覆盖数据库中对应内容
+												tag ：数据标志											
+													
+											传递进去的map要求:(根据user_id来修改)
+												user_id，name sex，pwd，age，intro ,token
+												
+																									string GetAuth(user_id ,token string)
+																									//1.权限判断的时候先用这个函数将对应用户的权限查询出来
+																									//2.手机app登录时，先用这个函数将权限查出来，再根据权限决定要显示什么控件
+																									
+											
+	用户登录（不需要检查权限和token）11			map Login(map[string]string)							map  CheckNamePwd(user_id pwd ,token string)  
+											返回的map要求有：											返回的map要求：  isCorrect：//代表用户名和密码是否都正确
+												tag ：数据标志															  auth:如果上面都正确的话，这里就用来存储 查询出来的权限
+												auth: 代表这个用户的所有权限（一个字符串里面用逗号分隔）				  																										  
+												token:
+												
+											传递进去的map要求:
+												user_id pwd
+								
+	修改密码					12          map ModifyPwd(map[string]string)							map Modifypwd(name newpwd  oldpwd token string)
+											返回的map要求有：											返回的map要求：  isChange：//代表是否修改成功
+												tag ：数据标志															  msg:0：原密码错误  1令牌错误  
+												其余内容和Modifypwd返回的map一致
+													
+											传递进去的map要求:
+												user_id newpwd  oldpwd token
+											
+																						
+	
+普通管理员
+	增加公告					3
+	查看公告					4
+	修改公告					5
+	删除公告					6
+	查看自己所有信息			9			用的还是权限7的函数，但是要限定为只能查看自己(根据传进的token查到user_id，判断这与传进去的user_id是否一致)
+	修改自己所有信息			10			用的还是权限8的函数，但是要限定为只能修改自己(根据传进的token查到user_id，判断这与传进去的user_id是否一致)
+	
+普通用户
+	查看公告					4
+	查看自己所有信息			9
+	修改自己所有信息			10
+	
+对于tag
+“0”    操作失败（reason存储错误信息）
+“1”	   操作成功（可以使用这个map中的其他附带数据）
+“2”		用户还没登录（令牌验证出错）
+"3"    权限验证不通过（主要我做网站的时候要用到，用来判断跳转）
+op要求两位数
+"0+op"  代表op失败
+"1+op"   代表op成功
+
+
+数据库：(webserver)
+表名      		表字段
+user_role		user_id(int 用户账号)  role(varchar 角色名) 
+	 create table user_role(user_id int,role varchar(20));
+role_auth		role(string 角色名)   auth(string 权限字符串（多个权限号逗号分隔）)
+
+	 create table role_auth(role varchar(20),auth varchar(100));
+	 insert into role_auth(role,auth)values('user','4,9,10');
+	 insert into role_auth(role,auth)values('admin','3,4,5,6,9,10');
+	insert into role_auth(role,auth)values('sup_admin','0,1,2,3,4,5,6,7,8,9,10,11,12');
+			 
+user_data(1E)	user_id(主键，自增长 int)	  name  pwd  sex  age  intro   //除了age和user_id之外全是varchar
+	create table users(user_id int not null auto_increment primary key,name varchar(20),pwd varchar(30),sex varchar(10),age varchar(10),intro varchar(250));
+billboard		billboard_id(主键，自增长 int)   last_time(更新时间 timestamp类型)	user_id（int）,  name, content 
+	create table billboard(billboard_id int not null auto_increment primary key,last_time timestamp,user_id int,name varchar(20),content varchar(250));
+带添加功能：
+
+	添加角色（角色的权限组合是自定义的）
+	一个用户对应多个角色
+	。。。。。。。。。。。。。忘记账号
+	token期限
+
+
+问题记录：
+
+	log.fatal
+	添加用户缺少intro， 
+	如果数据库中的值为空，查询会出错
+
+id 是int还是string、不统一，转换麻烦
+查询公告并不是按照时间前三条查询出来
+只要有一个字段为空就会查询出错
+MViewBillboard 公告为空时会报错：slice bounds out of range

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>用户注册</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<!--[if lt IE 9]>
+      <script src="../static/bootstrap/js/html5shiv.min.js"></script>
+      <script src="../static/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+<script src="../static/jquery-easyui-1.4.5/jquery.min.js"></script>
+<script src="../static/bootstrap/js/bootstrap.min.js"></script>
+<style>
+body{
+	transition:background-color 1.5s;
+}
+</style>
+<script>
+$(function(){
+	$("#notice").hide();
+	$("#warrning").hide();
+	$(".container").hover(function(){
+		$("body").css("background-color","#495A80");	
+	},function(){
+		$("body").css("background-color","#C3BED4");
+	});		
+});
+
+function showWarning(msg){
+	$("#notice").hide();
+	$("#warrning").html(msg).show();
+}
+function showSuccess(msg){
+	$("#warrning").hide();
+	$("#notice").html(msg).show();
+}
+
+function check(){
+var name=$("#name").val();
+var pwd=$("#pwd").val();
+var repwd=$("#repwd").val();
+	if(name==""){
+		showWarning("昵称不能为空");
+	}else if(pwd!=repwd){
+		showWarning("两次密码不一致");
+	}else if(pwd==""){
+		showWarning("密码不能为空");
+	}else{
+		var sex=$("[name=sex]").val();
+		var age=$("[name=age]").val();
+		var intro=$("[name=intro]").val();
+	$.post("",{name:name,pwd:pwd,sex:sex,age:age,intro:intro},function(data){
+		if(data.substring(0, 1)=="0"){
+			//失败
+			showWarning("注册失败");
+		}else{
+			//成功	
+			showSuccess("注册成功,你的id为："+data);	
+		}	
+	});
+	}
+	return false;
+}
+</script>
+</head>
+
+<body style="background-color:#C3BED4;padding:100px;">
+<div class="container" style="background-color:#fff;padding:50px; min-width:250px; min-height:430px;">
+<form class="form-horizontal" method="post">
+	<h1>用户注册</h1>
+    <hr style="background-color:lightblue;height:1px;"><br />
+
+	<div class="form-group">
+		<label class="col-sm-2 control-label">昵称：</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control"  name="name" id="name">
+		</div>
+	</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label">密码：</label>
+		<div class="col-sm-10">
+			<input type="password" class="form-control"  name="pwd" id="pwd">
+		</div>
+	</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label">确认密码：</label>
+		<div class="col-sm-10">
+			<input type="password" class="form-control" id="repwd">
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label">性别：</label>
+		<div class="col-sm-10">
+		<select name="sex" class="easyui-combobox" style="width:100px;">
+		<option value="male">男</option>
+		<option value="female">女</option>
+		</select>
+		</div>
+	</div>
+    	<div class="form-group">
+		<label class="col-sm-2 control-label">年龄：</label>
+		<div class="col-sm-10">
+			<input type="number" class="form-control" name="age" >
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label">个人简介</label>
+		<div class="col-sm-10">
+			<textarea rows="7" class="form-control" placeholder="说点什么吧..." name="intro"></textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-10 col-sm-offset-2">
+			<button class="btn btn-lg btn-danger" onclick="return check();">注册</button>
+		</div>
+	</div>
+</form>
+<div class="alert alert-danger text-center" id="warrning"></div>
+<div class="alert alert-success text-center" id="notice"></div>
+</div>
+</body>
+</html>

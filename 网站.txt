@@ -1,0 +1,33 @@
+/login 登录界面：//获得session（token），然后以后的操作都是要读取session
+	
+	
+	/user  用户界面 ：
+		1.头顶上还可以显示公告
+			billboard_id   last_time	user_id,  name, content 
+		2.显示自己的信息
+			user_id	  name  pwd  sex  age  intro  role
+		
+	
+			0.权限管理   /auth			sup_admin				
+				
+			1.公告管理   /billboard			admin,sup_admin
+				
+			2.用户管理   /userMgn			sup_admin
+				
+			3.修改自己的信息  modify          都允许
+		
+		
+	可用元素：
+	6组合输入框（搜索按钮）
+	11缩略图（面包屑）
+		
+		--------------------------------------------------------------------------------
+	data := this.GetSession("token")
+	token, _ := data.(string)
+	data = this.GetSession("role")
+	R, _ := data.(string)
+	if token == "" {
+		this.Redirect("/login", 302)
+	} else if R != "sup_admin" {
+		this.Redirect("/deny", 302)
+	}

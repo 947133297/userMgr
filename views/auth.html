@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>权限管理</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/icon.css"rel="stylesheet">
+<!--[if lt IE 9]>
+      <script src="../static/bootstrap/js/html5shiv.min.js"></script>
+      <script src="../static/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+<script src="../static/jquery-easyui-1.4.5/jquery.min.js"></script>
+<script src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script src="../static/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+<style>
+body{
+	transition:background-color 1.5s;
+}
+.container{
+	transition:all 0.5s;
+	min-width:500px;
+}
+</style>
+<script>
+$(function(){
+	$("#msg").hide();
+	$(".container").hover(function(){
+		$("body").css("background-color","#495A80");	
+	},function(){
+		$("body").css("background-color","#C3BED4");
+	});	
+	$("#search").click(function(){
+		var user_id = $("#user_id").val();
+			$.post("",{id:user_id,op:"search"},function(data){
+					if(data!="##0%7"){
+						var arr = data.split("##0%7")
+						$("#username").html(arr[1]);
+						$("#msg h3 span").html(user_id);
+						$("#msg").show();	
+						$("option[value]").attr("selected",false);
+						if(arr[0]=="user"){
+							
+							$("[value='user']").attr("selected",true);
+						}else if(arr[0]=="admin"){
+							
+							$("[value='admin']").attr("selected",true);
+						}else if(arr[0]=="sup_admin"){
+							
+							$("[value='sup_admin']").attr("selected",true);
+						}
+									
+					}
+			});
+	});
+	
+	$("#modify").click(function(){
+		$.messager.confirm("提示", "确定修改？", function (r) {  
+        if (r) {  
+           var newrole = $('#role').val();
+		   var id = $("h3 span").html();
+		   $.post("",{id:id,role:newrole,op:"modify"},function(data){
+				if(data=="0"){
+					alert("修改失败");
+				}else if(data=="1"){
+				alert("修改成功");
+				location.reload();
+				}
+			});
+        }  
+    	});  
+	});
+	
+	});
+	
+</script>
+</head>
+
+<body style="background-color:#C3BED4;padding:100px;">
+<div class="container" style="background-color:#fff;padding:50px;">
+	<h1>角色分配</h1>
+    <hr style="background-color:lightblue;height:1px;"><br />
+<div class="input-group">
+	<input type="text" class="form-control" placeholder="请输入用户账号" id="user_id">
+	<span class="input-group-btn">
+		<button class="btn btn-danger" type="button" id="search">搜索</button>
+	</span>
+</div>
+<div id="msg">
+  <h3>"<span></span>"&nbsp;搜索结果：</h3>
+  <hr />
+   <table class="table" id="billboard">
+	<tr>
+		<td>用户名</td>
+		<td>当前角色</td>
+        <td></td>
+	</tr>
+    	<tr>
+		<td id="username"></td>
+		<td>
+      <select id="role" style="width:150px;">
+		<option value="user">普通用户</option>
+		<option value="admin">管理员</option>
+		<option value="sup_admin">超级管理员</option>
+	</select>    
+        </td>
+        <td><button class="btn btn-default" id="modify">确认修改</button></td>
+	</tr>
+    </table>
+</div>
+</div>
+
+</body>
+	
+</html>

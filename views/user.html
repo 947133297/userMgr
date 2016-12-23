@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>用户界面</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/icon.css"rel="stylesheet">
+<!--[if lt IE 9]>
+      <script src="../static/bootstrap/js/html5shiv.min.js"></script>
+      <script src="../static/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+<script src="../static/jquery-easyui-1.4.5/jquery.min.js"></script>
+<script src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script src="../static/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+<style>
+body{
+	transition:background-color 1.5s;
+}
+.container{
+	transition:all 0.5s;
+	min-width:700px;
+}
+
+#op a{
+	display:block;
+	color:black;
+	text-decoration:none;
+	float:left;
+	width:100px;
+	height:100px;
+	background-color:#86E65A;
+	margin:10px;
+	transition:all 0.8s;
+	line-height:100px;
+	text-align:center;
+	border-radius:15px;
+	-moz-border-radius:25px; /* Old Firefox */
+	font-family:微软雅黑; 
+	font-size:16px
+}
+#op a:hover{
+	width:120px;
+	height:120px;
+	line-height:120px;
+	cursor:pointer;
+	background-color:#24D197;
+}
+td{
+	width:150px;
+}
+.content{
+	white-space:nowrap; 
+	display:inline-block;
+	width:230px;
+	text-overflow:ellipsis;
+	overflow:hidden; 
+}
+.content a{
+	color:blue;
+	cursor:pointer;
+}
+.easyui-dialog{
+	width:400px;
+	height:200px;
+	padding:10px;
+}
+.item span{
+	width:200px;
+	display:inline-block;
+}
+tr:hover{
+	background-color:#D9EDF7;
+}
+
+
+</style>
+<script>
+$(function(){
+$(".easyui-dialog").dialog("close");
+	$(".container").hover(function(){
+		$("body").css("background-color","#495A80");	
+	},function(){
+		$("body").css("background-color","#C3BED4");
+	});	
+	$("#change").click(function(){
+		location.href="/login";	
+	});
+	$("#billboard").hide();
+		$("#msg").hide();
+	$("#trigger_billboard").click(function(){
+		var obj = $(this);
+		var msg = obj.text();
+		var b_obj = $("#billboard");
+		if(msg=="展开公告"){
+			b_obj.fadeIn(700);
+			obj.text("收起公告");
+		}else{
+			b_obj.fadeOut(700);
+			obj.text("展开公告");
+		}	
+	});
+	
+		$("#trigger_msg").click(function(){
+		var obj = $(this);
+		var msg = obj.text();
+		var b_obj = $("#msg");
+		if(msg=="展开个人信息"){
+			b_obj.fadeIn(700);
+			obj.text("收起个人信息");
+		}else{
+			b_obj.fadeOut(700);
+			obj.text("展开个人信息");
+		}	
+	});
+	
+	$(".content a").click(function(){
+		var num = $(this).attr("dlg");
+		var dlg = $("#"+num);
+		dlg.text($(this).text());
+		dlg.dialog('open');
+	});
+});
+</script>
+</head>
+
+<body style="background-color:#C3BED4;padding:100px;">
+<div class="container" style="background-color:#fff;padding:50px;">
+    <button class="btn btn-default" style="float:right" id="change">切换用户</button>
+	<h1>欢迎，{{.name}}</h1>
+
+    <hr style="background-color:lightblue;height:1px;"><br />
+	
+    <button id="trigger_billboard" class="btn btn-default">展开公告</button><br />
+    <br />
+    <table class="table" id="billboard">
+	<tr>
+		<td>编号</td>
+		<td>发布者</td>
+		<td>发布时间</td>
+        <td class=".content">公告内容</td>
+	</tr>
+	{{if .exist1}}
+	<tr>
+  
+		<td>{{.billboard_ids1}}</td>
+		<td>{{.names1}}</td>
+		<td>{{.last_times1}}</td>
+		<td class="content"><a dlg="d1">{{.contents1}}</a></td>
+	</tr>
+	{{end}}
+	{{if .exist2}}
+	<tr>
+
+		<td>{{.billboard_ids2}}</td>
+		<td>{{.names2}}</td>
+		<td>{{.last_times2}}</td>
+		<td class="content"><a dlg="d2">{{.contents2}}</a></td>
+	</tr>
+		{{end}}
+		{{if .exist3}}
+	<tr>
+
+		<td>{{.billboard_ids3}}</td>
+		<td>{{.names3}}</td>
+		<td>{{.last_times3}}</td>
+		<td class="content"><a dlg="d3">{{.contents3}}</a></td>
+	</tr>
+		{{end}}
+</table>
+
+
+<br />
+    <button id="trigger_msg" class="btn btn-default">展开个人信息</button><br />
+    <br />
+    <table class="table" id="msg" >
+	<tr>
+		<td class="item"><span>账号:</span></td>
+		<td colspan="5">{{.id}}</td>
+
+	</tr>
+	<tr>
+		<td class="item"><span>昵称:</span></td>
+		<td colspan="5">{{.name}}</td>
+	</tr>
+	<tr>
+		<td class="item"><span>性别:</span></td>
+		<td colspan="5">{{.sex}}</td>
+		
+	</tr>
+	<tr>
+		<td class="item"><span>年龄:</span></td>
+		<td colspan="5">{{.age}}</td>
+	</tr>
+    	<tr>
+		<td class="item"><span>所在用户组:</span></td>
+		<td colspan="5">{{.role}}</td>
+	</tr>
+    	<tr>
+		<td class="item"><span>个人简介:</span></td>
+		<td colspan="5">{{.intro}}</td>
+	</tr>
+</table>
+    
+    
+    
+    
+    
+    
+    
+    <br />
+<h3>你有以下权限:</h3><br />
+<div id="op">
+{{range $index, $elem := .Auths}}
+ {{if eq $elem "0"}}
+	<a href = "/auth" target="_blank">权限管理</a>
+{{end}}
+{{if eq $elem "1"}}
+	<a href = "/billboard" target="_blank">公告管理</a>
+{{end}}
+{{if eq $elem "2"}}
+	<a href = "/userMgn" target="_blank">用户管理</a>
+{{end}}
+{{if eq $elem "3"}}
+
+	<a href = "/modify_ourself" target="_blank">修改信息</a>
+
+	<!--<a href = "/modify_other">修改信息</a>-->
+
+{{end}}
+{{end}}
+
+</div>
+	
+	
+</div>
+
+</body>
+	<div id="d1" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ></div>
+	<div id="d2" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ></div>
+	<div id="d3" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ></div>
+</html>

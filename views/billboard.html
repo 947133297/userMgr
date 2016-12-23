@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>公告管理</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="../static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet">
+<link href="../static/jquery-easyui-1.4.5/themes/icon.css"rel="stylesheet">
+<!--[if lt IE 9]>
+      <script src="../static/bootstrap/js/html5shiv.min.js"></script>
+      <script src="../static/bootstrap/js/respond.min.js"></script>
+    <![endif]-->
+<script src="../static/jquery-easyui-1.4.5/jquery.min.js"></script>
+<script src="../static/bootstrap/js/bootstrap.min.js"></script>
+<script src="../static/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+<style>
+body{
+	transition:background-color 1.5s;
+}
+.container{
+	transition:all 0.5s;
+	min-width:800px;
+}
+
+td{
+	width:150px;
+}
+.content{
+	white-space:nowrap; 
+	display:inline-block;
+	width:230px;
+	text-overflow:ellipsis;
+	overflow:hidden; 
+}
+.content a{
+	color:blue;
+	cursor:pointer;
+}
+.item span{
+	width:200px;
+	display:inline-block;
+}
+tr:hover{
+	background-color:#D9EDF7;
+}
+.bt{
+	width:70px;
+}
+.easyui-dialog{
+	width:400px;
+	height:200px;
+	padding:10px;
+}
+
+
+</style>
+<script>
+$(function(){
+$(".easyui-dialog").dialog("close");
+	$(".container").hover(function(){
+		$("body").css("background-color","#495A80");	
+	},function(){
+		$("body").css("background-color","#C3BED4");
+	});	
+	$("#add").click(function(){
+		$("#dlg").dialog("open");
+	});
+	$("#commit").click(function(){
+		var content = $("#newbillboard").val();
+		$.post("",{content:content,op:"add"},function(data){
+		if(data=="0"){
+			//失败
+			alert("增加失败");
+				}else if(data=="1"){
+			//成功	
+				alert("增加成功");
+				location.reload();
+		}
+	});
+		
+	});
+		$(".content a").click(function(){
+		var num = $(this).attr("dlg");
+		var dlg = $("#"+num);
+		
+		dlg.children("h5").text($(this).text());
+		dlg.dialog('open');
+	});
+	$("[del]").click(function(){
+		var id = $(this).attr("del");
+				$.messager.confirm("提示", "确定要删除编号为："+id+"的公告？", function (r) {  
+        if (r) {  
+          	$.post("",{id:id,op:"del"},function(data){
+		if(data=="0"){
+			//失败
+			alert("删除失败");
+				}else if(data=="1"){
+			//成功	
+				alert("删除成功");
+				location.reload();
+		}
+	});
+			
+        }  
+    	});  
+	});	
+	
+	});
+	
+</script>
+</head>
+
+<body style="background-color:#C3BED4;padding:100px;">
+<div class="container" style="background-color:#fff;padding:50px;">
+<h1>公告管理</h1>
+<hr style="background-color:lightblue;height:1px;"><br />
+<button class="btn btn-danger" id="add">添加公告</button>
+<br /><br />
+
+    <table class="table" id="billboard">
+	<tr>
+            <td>操作</td>
+		<td>编号</td>
+		<td>发布者</td>
+		 <td>发布时间</td>
+        <td class=".content">公告内容</td>
+
+	</tr>
+	{{if .exist1}}
+	<tr>
+            <td><div class="bt"><button class="btn btn-sm" del="{{.billboard_ids1}}">删除</button>
+        
+        &nbsp;</div></td>
+		<td>{{.billboard_ids1}}</td>
+		<td>{{.names1}}</td>
+		<td>{{.last_times1}}</td>
+		<td class="content"><a dlg="d1">{{.contents1}}</a></td>
+	</tr>
+	{{end}}
+	{{if .exist2}}
+	<tr>
+    <td><div class="bt"><button class="btn btn-sm"  del="{{.billboard_ids2}}">删除</button>
+        
+        &nbsp;</div></td>
+		<td>{{.billboard_ids2}}</td>
+		<td>{{.names2}}</td>
+		<td>{{.last_times2}}</td>
+		<td class="content"><a dlg="d2">{{.contents2}}</a></td>
+	</tr>
+		{{end}}
+		{{if .exist3}}
+	<tr>
+    <td><div class="bt"><button class="btn btn-sm"  del="{{.billboard_ids3}}">删除</button>
+        
+        &nbsp;</div></td>
+		<td>{{.billboard_ids3}}</td>
+		<td>{{.names3}}</td>
+		<td>{{.last_times3}}</td>
+		<td class="content"><a dlg="d3">{{.contents3}}</a></td>
+	</tr>
+		{{end}}
+</table>
+
+	<div id="dlg" class="easyui-dialog" title="添加公告" style="width:400px;height:310px;padding:10px">
+		<textarea cols="55" rows="9"class="form-control" id="newbillboard"></textarea><br />
+        <div class="text-right">
+        <button class="btn btn-default" id="commit">提交</button></div>
+	</div>
+
+
+</div>
+
+</body>
+<div id="d1" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ><h5></h5></div>
+<div id="d2" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ><h5></h5></div>
+<div id="d3" class="easyui-dialog" title="公告" data-options="iconCls:'icon-search'" ><h5></h5></div>
+
+
+	
+</html>
